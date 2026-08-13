@@ -1,8 +1,12 @@
-from fastapi import Depends, FastAPI, HTTPException
+from calendar import monthrange
+from datetime import date
+
+from fastapi import Depends, FastAPI, HTTPException, Query
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.database import Base, engine, get_db
-from app.models import Expense
+from app.models import Category, Expense
 from app.schemas import ExpenseCreate, ExpenseOut
 
 Base.metadata.create_all(bind=engine)
@@ -22,6 +26,23 @@ def create_expense(expense: ExpenseCreate, db: Session = Depends(get_db)):
 @app.get("/expenses", response_model=list[ExpenseOut])
 def list_expenses(db: Session = Depends(get_db)):
     return db.query(Expense).all()
+
+
+@app.get("/summary", response_model=dict[Category, float])
+def get_summary(
+    month: int = Query(..., ge=1, le=12),
+    year: int = Query(..., ge=1),
+    db: Session = Depends(get_db),
+):
+    start_date = date(year, month, 1)
+    end_date = date(year, month, monthrange(year, month)[1])
+    results = (
+        db.query(Expense.category, func.sum(Expense.amount))
+        .filter(Expense.date >= start_date, Expense.date <= end_date)
+        .group_by(Expense.category)
+        .all()
+    )
+    return {category: total for category, total in results}
 
 
 @app.delete("/expenses/{expense_id}", status_code=204)
