@@ -26,3 +26,12 @@ No update/edit functionality yet (may be added later).
 ## Categories
 Categories are a fixed, predefined set - not free text - to avoid
 inconsistent/duplicate category names from typos.
+
+## Lessons Learned
+- SQLite uses type affinity, not strict enforcement - schemas.py (Pydantic)
+  is the real type enforcement layer, not models.py.
+- Always check terminal/server logs for the real error behind a 500 Internal
+  Server Error, since the client-facing message hides details for security.
+- A 200/successful status code doesn't guarantee correctness - silent logic
+  bugs like boundary condition errors can produce valid-looking wrong
+  responses.
