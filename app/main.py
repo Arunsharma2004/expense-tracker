@@ -44,7 +44,6 @@ def get_summary(
     )
     return {category: total for category, total in results}
 
-#Updated by Branch A
 @app.put("/expenses/{expense_id}", response_model=ExpenseOut)
 def update_expense(expense_id: int, expense: ExpenseUpdate, db: Session = Depends(get_db)):
     db_expense = db.get(Expense, expense_id)
