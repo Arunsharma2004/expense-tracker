@@ -11,6 +11,12 @@ class ExpenseCreate(BaseModel):
     date: date_type
 
 
+class ExpenseUpdate(BaseModel):
+    amount: float = Field(gt=0)
+    category: Category
+    date: date_type
+
+
 class ExpenseOut(ExpenseCreate):
     model_config = ConfigDict(from_attributes=True)
 

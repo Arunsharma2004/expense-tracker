@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from app.database import Base, engine, get_db
 from app.models import Category, Expense
-from app.schemas import ExpenseCreate, ExpenseOut
+from app.schemas import ExpenseCreate, ExpenseOut, ExpenseUpdate
 
 Base.metadata.create_all(bind=engine)
 
@@ -43,6 +43,19 @@ def get_summary(
         .all()
     )
     return {category: total for category, total in results}
+
+
+@app.put("/expenses/{expense_id}", response_model=ExpenseOut)
+def update_expense(expense_id: int, expense: ExpenseUpdate, db: Session = Depends(get_db)):
+    db_expense = db.get(Expense, expense_id)
+    if db_expense is None:
+        raise HTTPException(status_code=404, detail="Expense not found")
+    db_expense.amount = expense.amount
+    db_expense.category = expense.category
+    db_expense.date = expense.date
+    db.commit()
+    db.refresh(db_expense)
+    return db_expense
 
 
 @app.delete("/expenses/{expense_id}", status_code=204)
