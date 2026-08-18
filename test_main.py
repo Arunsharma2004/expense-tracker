@@ -95,3 +95,16 @@ def test_update_expense_invalid_category():
     assert response.status_code == 422
     data = response.json()
     assert "detail" in data
+
+def test_create_budget():
+    response = client.post("/budgets", json={
+        "category": "groceries",
+        "amount": 500,
+        "month": 8,
+        "year": 2026
+    })
+    assert response.status_code == 201
+    data = response.json()
+    assert data["category"] == "groceries"
+    assert data["amount"] == 500
+    assert "id" in data
