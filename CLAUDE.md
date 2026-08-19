@@ -27,6 +27,15 @@ No update/edit functionality yet (may be added later).
 Categories are a fixed, predefined set - not free text - to avoid
 inconsistent/duplicate category names from typos.
 
+## Known Limitations
+- Tests in test_main.py share the same database (expenses.db) and aren't isolated from
+  each other - setup data from one test (e.g. a valid expense created before testing an
+  invalid update) can leak into and affect assertions in unrelated tests (e.g.
+  test_check_budget's spending totals). A proper fix would use a separate, isolated test
+  database (possibly in-memory SQLite) that resets between each test, so tests never
+  depend on or interfere with each other's data. Currently worked around by using >=
+  instead of == in assertions sensitive to totals.
+
 ## Lessons Learned
 - SQLite uses type affinity, not strict enforcement - schemas.py (Pydantic)
   is the real type enforcement layer, not models.py.
