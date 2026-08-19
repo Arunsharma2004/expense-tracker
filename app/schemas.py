@@ -38,3 +38,11 @@ class BudgetOut(BaseModel):
     amount: float
     month: int
     year: int
+
+
+class BudgetStatus(BaseModel):
+    category: Category
+    month: int
+    year: int
+    spent: float
+    remaining: float
