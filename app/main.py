@@ -6,8 +6,8 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.database import Base, engine, get_db
-from app.models import Category, Expense
-from app.schemas import ExpenseCreate, ExpenseOut, ExpenseUpdate
+from app.models import Budget, Category, Expense
+from app.schemas import BudgetCreate, BudgetOut, ExpenseCreate, ExpenseOut, ExpenseUpdate
 
 Base.metadata.create_all(bind=engine)
 
@@ -26,6 +26,15 @@ def create_expense(expense: ExpenseCreate, db: Session = Depends(get_db)):
 @app.get("/expenses", response_model=list[ExpenseOut])
 def list_expenses(db: Session = Depends(get_db)):
     return db.query(Expense).all()
+
+
+@app.post("/budgets", response_model=BudgetOut, status_code=201)
+def create_budget(budget: BudgetCreate, db: Session = Depends(get_db)):
+    db_budget = Budget(**budget.model_dump())
+    db.add(db_budget)
+    db.commit()
+    db.refresh(db_budget)
+    return db_budget
 
 
 @app.get("/summary", response_model=dict[Category, float])

@@ -22,3 +22,13 @@ class Expense(Base):
     amount = Column(Float, nullable=False)
     category = Column(Enum(Category), nullable=False)
     date = Column(Date, nullable=False)
+
+
+class Budget(Base):
+    __tablename__ = "budgets"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    category = Column(Enum(Category), nullable=False)
+    amount = Column(Float, nullable=False)
+    month = Column(Integer, nullable=False)
+    year = Column(Integer, nullable=False)
