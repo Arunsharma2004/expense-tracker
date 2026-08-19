@@ -108,3 +108,24 @@ def test_create_budget():
     assert data["category"] == "groceries"
     assert data["amount"] == 500
     assert "id" in data
+
+def test_check_budget():
+    client.post("/budgets", json={
+    "category": "groceries",
+    "amount": 300,
+    "month": 8,
+    "year": 2026
+    })
+    client.post("/expenses", json={
+    "amount": 250,
+    "category": "groceries",
+    "date": "2026-08-15"
+    })
+    response = client.get("/budgets?category=groceries&month=8&year=2026")
+    assert response.status_code == 200
+    data = response.json()
+    assert data["category"] == "groceries"
+    assert data["month"] == 8
+    assert data["year"] == 2026
+    assert data["spent"] == 250
+    assert data["remaining"] == 50
