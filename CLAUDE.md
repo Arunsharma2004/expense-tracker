@@ -2,7 +2,8 @@
 
 ## Overview
 A personal expense tracker backend built with FastAPI. Tracks
-individual expenses (not budgets) with amount, category, and date.
+individual expenses (amount, category, date) and monthly budgets
+per category, and can report spending summaries.
 
 ## Data Model
 Expense:
@@ -19,9 +20,11 @@ SQLite database (not a flat JSON file like the earlier todo-app project).
 FastAPI routes following REST conventions:
 - POST /expenses - create a new expense
 - GET /expenses - list all expenses
+- PUT /expenses/{id} - update a specific expense by its id
 - DELETE /expenses/{id} - delete a specific expense by its id
-
-No update/edit functionality yet (may be added later).
+- POST /budgets - create a budget for a category/month/year
+- GET /budgets - check budget status (spent/remaining) for a category/month/year
+- GET /summary - get total spending per category for a given month/year
 
 ## Categories
 Categories are a fixed, predefined set - not free text - to avoid
@@ -35,6 +38,13 @@ inconsistent/duplicate category names from typos.
   database (possibly in-memory SQLite) that resets between each test, so tests never
   depend on or interfere with each other's data. Currently worked around by using >=
   instead of == in assertions sensitive to totals.
+
+## Future Improvements
+- Consider adopting the `Annotated` dependency alias pattern (e.g.
+  `SessionDep = Annotated[Session, Depends(get_db)]` in deps.py) instead of
+  repeating `Session = Depends(get_db)` in every route signature - seen in
+  tiangolo/full-stack-fastapi-template during Day 17 codebase exploration.
+  Reduces duplication similar to the resolve_task helper pattern from Day 10.
 
 ## Lessons Learned
 - SQLite uses type affinity, not strict enforcement - schemas.py (Pydantic)
