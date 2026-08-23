@@ -22,7 +22,7 @@ app = FastAPI(title="Expense Tracker")
 
 
 @app.post("/expenses", response_model=ExpenseOut, status_code=201)
-def create_expense(expense: ExpenseCreate, db: Session = Depends(get_db)):
+def create_expense(expense: ExpenseCreate, db: Session = Depends(get_db)) -> Expense:
     db_expense = Expense(**expense.model_dump())
     db.add(db_expense)
     db.commit()
@@ -31,12 +31,12 @@ def create_expense(expense: ExpenseCreate, db: Session = Depends(get_db)):
 
 
 @app.get("/expenses", response_model=list[ExpenseOut])
-def list_expenses(db: Session = Depends(get_db)):
+def list_expenses(db: Session = Depends(get_db)) -> list[Expense]:
     return db.query(Expense).all()
 
 
 @app.post("/budgets", response_model=BudgetOut, status_code=201)
-def create_budget(budget: BudgetCreate, db: Session = Depends(get_db)):
+def create_budget(budget: BudgetCreate, db: Session = Depends(get_db)) -> Budget:
     db_budget = Budget(**budget.model_dump())
     db.add(db_budget)
     db.commit()
@@ -50,7 +50,7 @@ def check_budget(
     month: int = Query(..., ge=1, le=12),
     year: int = Query(..., ge=1),
     db: Session = Depends(get_db),
-):
+) -> dict[str, Category | int | float]:
     budget = (
         db.query(Budget)
         .filter(Budget.category == category, Budget.month == month, Budget.year == year)
@@ -86,7 +86,7 @@ def get_summary(
     month: int = Query(..., ge=1, le=12),
     year: int = Query(..., ge=1),
     db: Session = Depends(get_db),
-):
+) -> dict[Category, float]:
     start_date = date(year, month, 1)
     end_date = date(year, month, monthrange(year, month)[1])
     results = (
@@ -98,7 +98,9 @@ def get_summary(
     return {category: total for category, total in results}
 
 @app.put("/expenses/{expense_id}", response_model=ExpenseOut)
-def update_expense(expense_id: int, expense: ExpenseUpdate, db: Session = Depends(get_db)):
+def update_expense(
+    expense_id: int, expense: ExpenseUpdate, db: Session = Depends(get_db)
+) -> Expense:
     db_expense = db.get(Expense, expense_id)
     if db_expense is None:
         raise HTTPException(status_code=404, detail="Expense not found")
@@ -111,7 +113,7 @@ def update_expense(expense_id: int, expense: ExpenseUpdate, db: Session = Depend
 
 
 @app.delete("/expenses/{expense_id}", status_code=204)
-def delete_expense(expense_id: int, db: Session = Depends(get_db)):
+def delete_expense(expense_id: int, db: Session = Depends(get_db)) -> None:
     db_expense = db.get(Expense, expense_id)
     if db_expense is None:
         raise HTTPException(status_code=404, detail="Expense not found")
