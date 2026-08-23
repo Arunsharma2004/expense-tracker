@@ -1,0 +1,7 @@
+[tool.ruff.lint]
+extend-select = [
+    "B",  # flake8-bugbear
+]
+ignore = [
+    "B008",  # function call in default argument - required by FastAPI's Depends() pattern
+]
