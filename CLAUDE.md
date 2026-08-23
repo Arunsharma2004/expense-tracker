@@ -30,6 +30,10 @@ FastAPI routes following REST conventions:
 Categories are a fixed, predefined set - not free text - to avoid
 inconsistent/duplicate category names from typos.
 
+## Development Workflow
+- After every code change, run `ruff check .` and `pytest` to confirm nothing
+  is broken before considering the change complete.
+
 ## Known Limitations
 - Tests in test_main.py share the same database (expenses.db) and aren't isolated from
   each other - setup data from one test (e.g. a valid expense created before testing an
