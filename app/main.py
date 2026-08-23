@@ -21,6 +21,17 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Expense Tracker")
 
 
+def month_bounds(year: int, month: int) -> tuple[date, date]:
+    return date(year, month, 1), date(year, month, monthrange(year, month)[1])
+
+
+def get_expense_or_404(db: Session, expense_id: int) -> Expense:
+    db_expense = db.get(Expense, expense_id)
+    if db_expense is None:
+        raise HTTPException(status_code=404, detail="Expense not found")
+    return db_expense
+
+
 @app.post("/expenses", response_model=ExpenseOut, status_code=201)
 def create_expense(expense: ExpenseCreate, db: Session = Depends(get_db)) -> Expense:
     db_expense = Expense(**expense.model_dump())
@@ -59,8 +70,7 @@ def check_budget(
     if budget is None:
         raise HTTPException(status_code=404, detail="Budget not found")
 
-    start_date = date(year, month, 1)
-    end_date = date(year, month, monthrange(year, month)[1])
+    start_date, end_date = month_bounds(year, month)
     spent = (
         db.query(func.sum(Expense.amount))
         .filter(
@@ -87,8 +97,7 @@ def get_summary(
     year: int = Query(..., ge=1),
     db: Session = Depends(get_db),
 ) -> dict[Category, float]:
-    start_date = date(year, month, 1)
-    end_date = date(year, month, monthrange(year, month)[1])
+    start_date, end_date = month_bounds(year, month)
     results = (
         db.query(Expense.category, func.sum(Expense.amount))
         .filter(Expense.date >= start_date, Expense.date <= end_date)
@@ -101,9 +110,7 @@ def get_summary(
 def update_expense(
     expense_id: int, expense: ExpenseUpdate, db: Session = Depends(get_db)
 ) -> Expense:
-    db_expense = db.get(Expense, expense_id)
-    if db_expense is None:
-        raise HTTPException(status_code=404, detail="Expense not found")
+    db_expense = get_expense_or_404(db, expense_id)
     db_expense.amount = expense.amount
     db_expense.category = expense.category
     db_expense.date = expense.date
@@ -114,8 +121,6 @@ def update_expense(
 
 @app.delete("/expenses/{expense_id}", status_code=204)
 def delete_expense(expense_id: int, db: Session = Depends(get_db)) -> None:
-    db_expense = db.get(Expense, expense_id)
-    if db_expense is None:
-        raise HTTPException(status_code=404, detail="Expense not found")
+    db_expense = get_expense_or_404(db, expense_id)
     db.delete(db_expense)
     db.commit()
