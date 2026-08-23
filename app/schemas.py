@@ -40,6 +40,8 @@ class BudgetOut(BaseModel):
     year: int
 
 
+# Intentionally not named BudgetStatusOut - unlike the *Out schemas, this is a
+# computed result (spent/remaining), not a serialized database row.
 class BudgetStatus(BaseModel):
     category: Category
     month: int
