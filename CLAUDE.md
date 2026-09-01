@@ -42,6 +42,10 @@ inconsistent/duplicate category names from typos.
   database (possibly in-memory SQLite) that resets between each test, so tests never
   depend on or interfere with each other's data. Currently worked around by using >=
   instead of == in assertions sensitive to totals.
+- Amounts are stored as Float, which has known precision issues for currency
+  (e.g. 0.1 + 0.2 not being exactly 0.3). Consider Numeric or integer cents if
+  this becomes a real production concern. Not fixed now since it would require
+  coordinated changes across models.py, schemas.py, and the tests.
 
 ## Future Improvements
 - Consider adopting the `Annotated` dependency alias pattern (e.g.

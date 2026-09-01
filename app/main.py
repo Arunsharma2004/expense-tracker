@@ -33,6 +33,13 @@ def get_expense_or_404(expense_id: int, db: Session) -> Expense:
     return db_expense
 
 
+def get_budget_or_404(budget_id: int, db: Session) -> Budget:
+    db_budget = db.get(Budget, budget_id)
+    if db_budget is None:
+        raise HTTPException(status_code=404, detail="Budget not found")
+    return db_budget
+
+
 @app.post("/expenses", response_model=ExpenseOut, status_code=201)
 def create_expense(expense: ExpenseCreate, db: Session = Depends(get_db)) -> Expense:
     db_expense = Expense(**expense.model_dump())
@@ -134,4 +141,11 @@ def update_expense(
 def delete_expense(expense_id: int, db: Session = Depends(get_db)) -> None:
     db_expense = get_expense_or_404(expense_id, db)
     db.delete(db_expense)
+    db.commit()
+
+
+@app.delete("/budgets/{budget_id}", status_code=204)
+def delete_budget(budget_id: int, db: Session = Depends(get_db)) -> None:
+    db_budget = get_budget_or_404(budget_id, db)
+    db.delete(db_budget)
     db.commit()

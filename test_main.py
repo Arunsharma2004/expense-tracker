@@ -126,6 +126,24 @@ def test_create_duplicate_budget():
     assert response.status_code == 409
     assert "detail" in response.json()
 
+def test_delete_budget():
+    create_response = client.post("/budgets", json={
+        "category": "utilities",
+        "amount": 150,
+        "month": 4,
+        "year": 2026
+    })
+    budget_id = create_response.json()["id"]
+
+    response = client.delete(f"/budgets/{budget_id}")
+    assert response.status_code == 204
+
+def test_delete_nonexistent_budget():
+    response = client.delete("/budgets/999")
+    assert response.status_code == 404
+    data = response.json()
+    assert "detail" in data
+
 def test_check_budget():
     client.post("/budgets", json={
     "category": "groceries",
