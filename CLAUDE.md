@@ -47,6 +47,16 @@ inconsistent/duplicate category names from typos.
   this becomes a real production concern. Not fixed now since it would require
   coordinated changes across models.py, schemas.py, and the tests.
 
+### Style & Consistency Notes
+Lower-priority items from code review, not yet addressed:
+- BudgetOut re-declares its fields instead of inheriting from BudgetCreate the way ExpenseOut inherits from ExpenseCreate.
+- ExpenseCreate and ExpenseUpdate are currently identical - unclear whether that is intentional.
+- Mixed SQLAlchemy styles: db.get() in some routes, db.query() in others; declarative_base() rather than 2.0-style DeclarativeBase.
+- Route ordering in main.py doesn't keep all /expenses routes grouped together.
+- No indexes on Expense.date or Expense.category despite both being filtered on frequently.
+- The year field has no upper-bound validation.
+- No auth or CORS configured - fine for personal localhost use, but worth revisiting if ever exposed publicly.
+
 ## Future Improvements
 - Consider adopting the `Annotated` dependency alias pattern (e.g.
   `SessionDep = Annotated[Session, Depends(get_db)]` in deps.py) instead of
