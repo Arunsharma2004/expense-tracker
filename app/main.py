@@ -3,6 +3,7 @@ from datetime import date
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from sqlalchemy import func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.database import Base, engine, get_db
@@ -50,7 +51,17 @@ def list_expenses(db: Session = Depends(get_db)) -> list[Expense]:
 def create_budget(budget: BudgetCreate, db: Session = Depends(get_db)) -> Budget:
     db_budget = Budget(**budget.model_dump())
     db.add(db_budget)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                f"A budget for {budget.category.value} "
+                f"{budget.month}/{budget.year} already exists"
+            ),
+        ) from None
     db.refresh(db_budget)
     return db_budget
 

@@ -1,6 +1,6 @@
 import enum
 
-from sqlalchemy import Column, Date, Enum, Float, Integer
+from sqlalchemy import Column, Date, Enum, Float, Integer, UniqueConstraint
 
 from app.database import Base
 
@@ -26,6 +26,11 @@ class Expense(Base):
 
 class Budget(Base):
     __tablename__ = "budgets"
+    __table_args__ = (
+        UniqueConstraint(
+            "category", "month", "year", name="uq_budget_category_month_year"
+        ),
+    )
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     category = Column(Enum(Category), nullable=False)
